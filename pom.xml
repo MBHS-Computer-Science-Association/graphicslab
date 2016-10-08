@@ -10,6 +10,7 @@
 	<properties>
 		<lwjgl.version>3.0.0</lwjgl.version>
 		<joml.version>1.8.4</joml.version>
+		<junit.version>4.12</junit.version>
 	</properties>
 
 	<profiles>
@@ -49,6 +50,12 @@
 	</profiles>
 
 	<dependencies>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+		</dependency>
+	
 		<dependency>
 			<groupId>org.lwjgl</groupId>
 			<artifactId>lwjgl</artifactId>
