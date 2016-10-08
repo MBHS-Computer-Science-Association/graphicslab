@@ -9,9 +9,9 @@ public class GraphicsSystem {
 
 	private static GLFWErrorCallback errorCallback;
 
-	public static void initialize() {
+	public static void init() {
 		if (isActive()) {
-			throw new UnsupportedOperationException("Can not initialize an already active graphics system.");
+			throw new UnsupportedOperationException("Can not initialize active graphics system.");
 		}
 		
 		errorCallback = GLFWErrorCallback.createPrint(System.err);
@@ -22,9 +22,9 @@ public class GraphicsSystem {
 		}
 	}
 
-	public static void dispose() {
+	public static void terminate() {
 		if (!isActive()) {
-			throw new UnsupportedOperationException("Can not dispose of inactive graphics system.");
+			throw new UnsupportedOperationException("Can not terminate inactive graphics system.");
 		}
 		
 		glfwTerminate();

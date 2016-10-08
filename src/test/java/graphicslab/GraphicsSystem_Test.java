@@ -9,21 +9,21 @@ public class GraphicsSystem_Test {
 	public ExpectedException exception = ExpectedException.none();
 	
 	@Test
-	public void multipleInitializeCalls() {
+	public void multipleInitCalls() {
 		exception.expect(UnsupportedOperationException.class);
-		GraphicsSystem.initialize();
-		GraphicsSystem.initialize();
+		GraphicsSystem.init();
+		GraphicsSystem.init();
 	}
 	
 	@Test
-	public void initializeAndDispose() {
-		GraphicsSystem.initialize();
-		GraphicsSystem.dispose();
+	public void initAndTerminate() {
+		GraphicsSystem.init();
+		GraphicsSystem.terminate();
 	}
 	
 	@Test
-	public void disposeWithoutInitialize() {
+	public void terminateWithoutInit() {
 		exception.expect(UnsupportedOperationException.class);
-		GraphicsSystem.dispose();
+		GraphicsSystem.terminate();
 	}
 }
