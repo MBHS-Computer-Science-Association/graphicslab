@@ -1,3 +1,4 @@
+*.log
 .settings/
 .classpath
 .project
