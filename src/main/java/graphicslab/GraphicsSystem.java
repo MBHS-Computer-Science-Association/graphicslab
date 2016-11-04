@@ -47,6 +47,12 @@ public class GraphicsSystem {
 	 * Destroys any remaining windows or cursors. Frees the error callback. Once
 	 * this function is called, you must call init() again to use any of the
 	 * windowing functions.
+	 * 
+	 * Precondition:  none
+	 * Postcondition: the glfw callback will be freed
+	 * 				  the callback field will be set to null
+	 *                the glfw system will be terminated
+	 *                the variable will be set to inactive
 	 */
 	public static void terminate() {
 		glfwTerminate();
@@ -55,7 +61,11 @@ public class GraphicsSystem {
 		if (previousCallback != null) {
 			previousCallback.free();
 		}
+
+		errorCallback = null;
+		isActive = false;
 	}
+	
 
 	/**
 	 * @return if graphics system is currently initialized.
