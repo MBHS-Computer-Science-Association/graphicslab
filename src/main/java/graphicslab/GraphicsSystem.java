@@ -22,16 +22,25 @@ public class GraphicsSystem {
 		}
 	}
 
+	/**
+	 * Precondition:  none
+	 * Postcondition: the glfw callback will be freed
+	 * 				  the callback field will be set to null
+	 *                the glfw system will be terminated
+	 *                the variable will be set to inactive
+	 */
 	public static void terminate() {
-		if (!isActive()) {
-			throw new UnsupportedOperationException("Can not terminate inactive graphics system.");
-		}
-		
 		glfwTerminate();
 
 		GLFWErrorCallback previousCallback = glfwSetErrorCallback(null);
-		previousCallback.free();
+		if (previousCallback != null) {
+			previousCallback.free();
+		}
+
+		errorCallback = null;
+		isActive = false;
 	}
+	
 
 	public static boolean isActive() {
 		return isActive;
