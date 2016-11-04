@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.lwjgl.glfw.GLFW;
 
-public class Window_Test {
+public class WindowTest {
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
 	
