@@ -2,6 +2,10 @@ package graphicslab;
 
 import static org.lwjgl.glfw.GLFW.*;
 
+import java.awt.event.WindowListener;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.lwjgl.glfw.GLFWErrorCallback;
 
 /**
@@ -18,6 +22,12 @@ public class GraphicsSystem {
 
 	private static GLFWErrorCallback errorCallback;
 
+	private static List<Window> windowList;
+	
+	static {
+		windowList = new LinkedList<>();
+	}
+	
 	/**
 	 * Creates and sets the GLFW error callback to {@link System.err}.
 	 * Initializes the GLFW library.
@@ -28,7 +38,7 @@ public class GraphicsSystem {
 	 * Returns true if successful or throws {@link IllegalStateException} in
 	 * case GLFW failed to initialize.
 	 */
-	public static boolean init() {
+	protected static boolean init() {
 		if (isActive()) {
 			return true;
 		}
@@ -43,6 +53,20 @@ public class GraphicsSystem {
 		return true;
 	}
 
+	protected static void addWindow(Window window) {
+		if (!isActive()) {
+			init();
+		}
+		windowList.add(window);
+	}
+	
+	protected static void removeWindow(Window window) {
+		windowList.remove(window);
+		if (windowList.isEmpty() && isActive()) {
+			terminate();
+		}
+	}
+	
 	/**
 	 * Destroys any remaining windows or cursors. Frees the error callback. Once
 	 * this function is called, you must call init() again to use any of the
@@ -54,7 +78,7 @@ public class GraphicsSystem {
 	 *                the glfw system will be terminated
 	 *                the variable will be set to inactive
 	 */
-	public static void terminate() {
+	protected static void terminate() {
 		glfwTerminate();
 
 		GLFWErrorCallback previousCallback = glfwSetErrorCallback(null);
@@ -65,10 +89,9 @@ public class GraphicsSystem {
 		errorCallback = null;
 		isActive = false;
 	}
-	
 
 	/**
-	 * @return if graphics system is currently initialized.
+	 * @return if graphics system is currently initialized
 	 */
 	public static boolean isActive() {
 		return isActive;
