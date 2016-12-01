@@ -11,6 +11,8 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWKeyCallbackI;
 import org.lwjgl.opengl.GL;
 
+import graphicslab.ShaderProgram.ShaderException;
+
 /**
  * Represents a window on the screen similar to {@link JFrame}. Provides an
  * object wrapper for the Window pointer in GLFW.
@@ -36,6 +38,9 @@ public class Window {
 
 	private GLFWKeyCallbackI keycallback;
 	
+	private ShaderProgram shaderProgram;
+	
+	private InitializeRoutine init;
 	private RenderRoutine render;
 	private StateRoutine state;
 	private InputRoutine input;
@@ -80,6 +85,20 @@ public class Window {
 		if (createWindow) {
 			createWindow();
 		}
+	}
+	
+	public void init() throws ShaderException {
+		if (init != null) {
+			init.initialize(this);
+		}
+	}
+	
+	public void setShaderProgram(ShaderProgram shaderProgram) {
+		this.shaderProgram = shaderProgram;
+	}
+	
+	public void setInitializeRoutine(InitializeRoutine routine) {
+		init = routine;
 	}
 	
 	public void setRenderRoutine(RenderRoutine routine) {
@@ -138,6 +157,12 @@ public class Window {
 
 		// Set the clear color
 		glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+
+		try {
+			init();
+		} catch (ShaderException e) {
+			e.printStackTrace();
+		}
 
 		double msecsPerFrame = 1000 / 50.0;
 		double msecsPerUpdate = 1000 / 30.0;
@@ -276,5 +301,9 @@ public class Window {
 	 */
 	protected long getWindowHandle() {
 		return windowHandle;
+	}
+	
+	public ShaderProgram getShaderProgram() {
+		return shaderProgram;
 	}
 }
