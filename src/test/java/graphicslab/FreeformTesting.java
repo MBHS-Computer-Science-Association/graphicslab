@@ -35,6 +35,9 @@ public class FreeformTesting {
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
+		    
+		    rwindow.setShaderProgram(shaderProgram);
+		    
 		    try {
 				shaderProgram.createVertexShader(Utils.loadResource("src/main/res/vertex.vs"));
 				shaderProgram.createFragmentShader(Utils.loadResource("src/main/res/fragment.fs"));
@@ -75,7 +78,7 @@ public class FreeformTesting {
 		
 		RenderRoutine render = (window) -> {
 			RenderingWindow rwindow = (RenderingWindow) window;
-			
+			System.out.println("hi");
 //			clear();
 
 //		    if ( window.isResized() ) {
@@ -105,6 +108,7 @@ public class FreeformTesting {
 		
 		window.setInitializeRoutine(init);
 		window.setStateRoutine(state);
+		window.setRenderRoutine(render);
 		
 		window.createWindow();
 		window.showWindow();
