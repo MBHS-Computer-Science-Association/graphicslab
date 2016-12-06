@@ -9,6 +9,8 @@ import javax.swing.JFrame;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWKeyCallbackI;
+import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.glfw.GLFWWindowSizeCallbackI;
 import org.lwjgl.opengl.GL;
 
 import graphicslab.ShaderProgram.ShaderException;
@@ -34,9 +36,12 @@ public class Window {
 
 	private int width;
 	private int height;
+	private boolean resized;
+	
 	private String title;
 
 	private GLFWKeyCallbackI keycallback;
+	private GLFWWindowSizeCallbackI sizecallback;
 	
 	private ShaderProgram shaderProgram;
 	
@@ -149,14 +154,18 @@ public class Window {
 
 	public void startLoop() {
 		keycallback = (window, key, scancode, action, mods)  -> {};
+		sizecallback = (window, width, height) -> {
+			this.width = width;
+			this.height = height;
+			this.setResized(true);
+		};
 		
 		glfwSetKeyCallback(windowHandle, keycallback);
+		glfwSetWindowSizeCallback(windowHandle, sizecallback);
 		
 		glfwMakeContextCurrent(windowHandle);
-		GL.createCapabilities();
 
-		// Set the clear color
-		glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+		GL.createCapabilities();
 
 		try {
 			init();
@@ -164,7 +173,6 @@ public class Window {
 			e.printStackTrace();
 		}
 
-		double msecsPerFrame = 1000 / 50.0;
 		double msecsPerUpdate = 1000 / 30.0;
 		double previous = glfwGetTime();
 		double steps = 0.0;
@@ -219,9 +227,13 @@ public class Window {
 	private void render() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
 		
+		shaderProgram.bind();
+		
 		if (render != null) {			
 			render.loop(this);
 		}
+		
+		shaderProgram.unbind();
 
 		glfwSwapBuffers(windowHandle); // swap the color buffers
 	}
@@ -267,6 +279,22 @@ public class Window {
 		glfwSetWindowTitle(windowHandle, title);
 	}
 
+	public int getWidth() {
+		return width;
+	}
+	
+	public int getHeight() {
+		return height;
+	}
+	
+	public boolean isResized() {
+		return resized;
+	}
+	
+	public void setResized(boolean resized) {
+		this.resized = resized;
+	}
+	
 	/**
 	 * Makes the window visible.
 	 */

@@ -1,32 +1,20 @@
 package graphicslab;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.nio.FloatBuffer;
-
-import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL;
-
-import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL11.*;
 
+import java.util.ArrayList;
+
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 public class FreeformTesting {
 	public static void main(String[] args) throws Exception {
 		
-		StateRoutine state = (window) -> {
-			if (window.isKeyPressed(GLFW.GLFW_KEY_SPACE)) {
-				System.out.println("space is pressed");
-			}
-		};
+		final Window testWindow = new RenderingWindow(800, 600, "A window.", false);
 		
-		/////////
 		
-		InitializeRoutine init = (window) -> {
+		testWindow.setInitializeRoutine((window) -> {
 			RenderingWindow rwindow = (RenderingWindow) window;
 			
 			ShaderProgram shaderProgram = null;
@@ -35,7 +23,6 @@ public class FreeformTesting {
 			} catch (Exception e1) {
 				e1.printStackTrace();
 			}
-		    
 		    rwindow.setShaderProgram(shaderProgram);
 		    
 		    try {
@@ -49,70 +36,136 @@ public class FreeformTesting {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		    
+		    try {
+				shaderProgram.createUniform("projectionMatrix");
+				shaderProgram.createUniform("worldMatrix");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		    
+		    glEnable(GL_DEPTH_TEST);
+		    
+		    // Initialize Meshes		    
+		    float[] positions = new float[] {
+		    	    // VO
+		    	    -0.5f,  0.5f,  0.5f,
+		    	    // V1
+		    	    -0.5f, -0.5f,  0.5f,
+		    	    // V2
+		    	    0.5f, -0.5f,  0.5f,
+		    	    // V3
+		    	     0.5f,  0.5f,  0.5f,
+		    	    // V4
+		    	    -0.5f,  0.5f, -0.5f,
+		    	    // V5
+		    	     0.5f,  0.5f, -0.5f,
+		    	    // V6
+		    	    -0.5f, -0.5f, -0.5f,
+		    	    // V7
+		    	     0.5f, -0.5f, -0.5f,
+		    	};
+		    
+		    float[] colors = new float[]{
+		    	    0.5f, 0.0f, 0.0f,
+		    	    0.0f, 0.5f, 0.0f,
+		    	    0.0f, 0.0f, 0.5f,
+		    	    0.0f, 0.5f, 0.5f,
+		    	    0.5f, 0.0f, 0.0f,
+		    	    0.0f, 0.5f, 0.0f,
+		    	    0.0f, 0.0f, 0.5f,
+		    	    0.0f, 0.5f, 0.5f,
+		    	};
+		    
+		    int[] indices = new int[] {
+		    	    // Front face
+		    	    0, 1, 3, 3, 1, 2,
+		    	    // Top Face
+		    	    4, 0, 3, 5, 4, 3,
+		    	    // Right face
+		    	    3, 2, 7, 5, 3, 7,
+		    	    // Left face
+		    	    0, 1, 6, 4, 0, 6,
+		    	    // Bottom face
+		    	    6, 1, 2, 7, 6, 2,
+		    	    // Back face
+		    	    4, 6, 7, 5, 4, 7,
+		    	};
+		    
+		    Mesh mesh = new Mesh(positions, colors, indices);
 			
-			float[] vertices = new float[]{
-				     0.0f,  0.5f, 0.0f,
-				    -0.5f, -0.5f, 0.0f,
-				     0.5f, -0.5f, 0.0f
-				};
-			
-			FloatBuffer verticesBuffer =
-				    BufferUtils.createFloatBuffer(vertices.length);
-				verticesBuffer.put(vertices).flip();
-			
-			rwindow.vaoId = glGenVertexArrays();
-			glBindVertexArray(rwindow.vaoId);
-			
-			rwindow.vboId = glGenBuffers();
-			glBindBuffer(GL_ARRAY_BUFFER, rwindow.vboId);
-			glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
-			
-			
-			glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-			
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
-			
-			shaderProgram.unbind();
-		};
+		    Item item = new Item(mesh);
+		    item.setPosition(new Vector3f(0.0f, 0.0f, -2.05f));
+		    
+		    rwindow.transformation = new Transformation();
+		    
+			rwindow.items = new ArrayList<>();
+			rwindow.items.add(item);
+		});
 		
-		RenderRoutine render = (window) -> {
-			RenderingWindow rwindow = (RenderingWindow) window;
-			System.out.println("hi");
-//			clear();
 
-//		    if ( window.isResized() ) {
-//		        glViewport(0, 0, window.getWidth(), window.getHeight());
-//		        window.setResized(false);
-//		    }
+		testWindow.setStateRoutine((window) -> {
+			RenderingWindow rwindow = (RenderingWindow) window;
 			
+			if (window.isKeyPressed(GLFW.GLFW_KEY_X)) {				
+				rwindow.items.get(0).setScale(rwindow.items.get(0).getScale() - 0.1f);
+			}
+			
+			if (window.isKeyPressed(GLFW.GLFW_KEY_S)) {				
+				rwindow.items.get(0).setScale(rwindow.items.get(0).getScale() + 0.1f);
+			}
+			
+			if (window.isKeyPressed(GLFW.GLFW_KEY_D)) {				
+				rwindow.items.get(0).getRotation().x += 0.1f;
+			}
+			
+			if (window.isKeyPressed(GLFW.GLFW_KEY_SPACE)) {
+				System.out.println("space is pressed");
+			}
+		});
+		
+		testWindow.setRenderRoutine((window) -> {
+			RenderingWindow rwindow = (RenderingWindow) window;
 			ShaderProgram shaderProgram = window.getShaderProgram();
 
-		    shaderProgram.bind();
+		    if ( window.isResized() ) {
+		        glViewport(0, 0, window.getWidth(), window.getHeight());
+		        window.setResized(false);
+		    }
 
-		    // Bind to the VAO
-		    glBindVertexArray(rwindow.vaoId);
-		    glEnableVertexAttribArray(0);
+			Transformation transformation = rwindow.transformation;
 
-		    // Draw the vertices
-		    glDrawArrays(GL_TRIANGLES, 0, 3);
+		    // perspective point of view
+		    /**
+		     * Field of View in Radians
+		     */
+		    final float FOV = (float) Math.toRadians(60.0f);
 
-		    // Restore state
-		    glDisableVertexAttribArray(0);
-		    glBindVertexArray(0);
+		    final float Z_NEAR = 0.01f;
 
-		    shaderProgram.unbind();
-		};
+		    final float Z_FAR = 1000.f;
+
+		    Matrix4f projectionMatrix;
+
+		    projectionMatrix = transformation.getProjectionMatrix(FOV, window.getWidth(), window.getHeight(), Z_NEAR, Z_FAR);
+			shaderProgram.setUniform("projectionMatrix", projectionMatrix);
+
+			for (Item item : rwindow.items) {
+		        Matrix4f worldMatrix =
+		            transformation.getWorldMatrix(
+		                item.getPosition(),
+		                item.getRotation(),
+		                item.getScale());
+				
+		        shaderProgram.setUniform("worldMatrix", worldMatrix);
+				item.getMesh().render();
+			}
+
+		});
 		
-		final Window window = new RenderingWindow(800, 600, "My first window.", false);
+		testWindow.createWindow();
+		testWindow.showWindow();
 		
-		window.setInitializeRoutine(init);
-		window.setStateRoutine(state);
-		window.setRenderRoutine(render);
-		
-		window.createWindow();
-		window.showWindow();
-		
-		window.startLoop();
+		testWindow.startLoop();
 	}
 }

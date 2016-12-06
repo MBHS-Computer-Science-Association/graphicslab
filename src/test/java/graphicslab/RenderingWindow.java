@@ -1,5 +1,7 @@
 package graphicslab;
 
+import java.util.List;
+
 public class RenderingWindow extends Window{
 
 	public RenderingWindow(int width, int height, String title) {
@@ -11,7 +13,6 @@ public class RenderingWindow extends Window{
 		super(width, height, title, createWindow);
 	}
 
-	int vaoId;
-	int vboId;
-	
+	List<Item> items;
+	Transformation transformation;
 }

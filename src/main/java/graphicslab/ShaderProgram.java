@@ -3,12 +3,21 @@ package graphicslab;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
 
+import java.nio.FloatBuffer;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.joml.Matrix4f;
+import org.lwjgl.BufferUtils;
+
 public class ShaderProgram {
 	private final int programId;
 	
 	private int vertexShaderId;
 	
 	private int fragmentShaderId;
+	
+	private final Map<String, Integer> uniforms;
 	
 	private boolean shadersLinked;
 	
@@ -18,7 +27,29 @@ public class ShaderProgram {
 		if (programId == 0) {
 			throw new ShaderException("Could not create shader program.");
 		}
+		
+		uniforms = new HashMap<>();
 	}
+	
+
+    public void createUniform(String uniformName) throws Exception {
+        int uniformLocation = glGetUniformLocation(programId, uniformName);
+        if (uniformLocation < 0) {
+            throw new Exception ("Could not find uniform in shader program:" + uniformName);
+        }
+        uniforms.put(uniformName, uniformLocation);
+    }
+    
+    public void setUniform(String uniformName, Matrix4f value) {
+        // Dump the matrix into a float buffer
+        FloatBuffer fb = BufferUtils.createFloatBuffer(16);
+        value.get(fb);
+        glUniformMatrix4fv(uniforms.get(uniformName), false, fb);
+    }
+
+    public void setUniform(String uniformName, int value) {
+        glUniform1i(uniforms.get(uniformName), value);
+    }
 	
 	public int createVertexShader(CharSequence sourcecode) throws ShaderException {
 		vertexShaderId = createShader(sourcecode, GL_VERTEX_SHADER);
