@@ -1,19 +1,36 @@
 package graphicslab;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
+import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
+import static org.lwjgl.glfw.GLFW.GLFW_DECORATED;
+import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT;
+import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
+import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
+import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
+import static org.lwjgl.glfw.GLFW.glfwDefaultWindowHints;
+import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
+import static org.lwjgl.glfw.GLFW.glfwGetKey;
+import static org.lwjgl.glfw.GLFW.glfwGetTime;
+import static org.lwjgl.glfw.GLFW.glfwHideWindow;
+import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
+import static org.lwjgl.glfw.GLFW.glfwPollEvents;
+import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetWindowSizeCallback;
+import static org.lwjgl.glfw.GLFW.glfwSetWindowTitle;
+import static org.lwjgl.glfw.GLFW.glfwShowWindow;
+import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
+import static org.lwjgl.glfw.GLFW.glfwWindowHint;
+import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 import javax.swing.JFrame;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWKeyCallbackI;
-import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallbackI;
-import org.lwjgl.opengl.GL;
-
-import graphicslab.ShaderProgram.ShaderException;
 
 /**
  * Represents a window on the screen similar to {@link JFrame}. Provides an
@@ -43,7 +60,7 @@ public class Window {
 	private GLFWKeyCallbackI keycallback;
 	private GLFWWindowSizeCallbackI sizecallback;
 	
-	private ShaderProgram shaderProgram;
+	private Renderer renderer; 
 	
 	private InitializeRoutine init;
 	private RenderRoutine render;
@@ -86,20 +103,19 @@ public class Window {
 		this.width = width;
 		this.height = height;
 		this.title = title;
+		this.renderer = new Renderer();
 		
 		if (createWindow) {
 			createWindow();
 		}
 	}
 	
-	public void init() throws ShaderException {
+	public void init() {
+		renderer.init();
+		
 		if (init != null) {
 			init.initialize(this);
 		}
-	}
-	
-	public void setShaderProgram(ShaderProgram shaderProgram) {
-		this.shaderProgram = shaderProgram;
 	}
 	
 	public void setInitializeRoutine(InitializeRoutine routine) {
@@ -130,9 +146,7 @@ public class Window {
 		GraphicsSystem.addWindow(this);
 		
 		glfwDefaultWindowHints();
-		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-
+		
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, OPENGL_VERSION_MAJOR);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, OPENGL_VERSION_MINOR);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -165,13 +179,7 @@ public class Window {
 		
 		glfwMakeContextCurrent(windowHandle);
 
-		GL.createCapabilities();
-
-		try {
-			init();
-		} catch (ShaderException e) {
-			e.printStackTrace();
-		}
+		init();
 
 		double msecsPerUpdate = 1000 / 30.0;
 		double previous = glfwGetTime();
@@ -208,13 +216,13 @@ public class Window {
 		return glfwGetKey(windowHandle, keycode) == GLFW.GLFW_PRESS;
 	}
 
-	private void input() {
+	protected void input() {
 		// Poll for window events. The key callback above will only be
 		// invoked during this call.
 		glfwPollEvents();
 		
 		if (input != null) {			
-			input.processInput();
+			input.processInput(this);
 		}
 	}
 
@@ -225,17 +233,7 @@ public class Window {
 	}
 
 	private void render() {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-		
-		shaderProgram.bind();
-		
-		if (render != null) {			
-			render.loop(this);
-		}
-		
-		shaderProgram.unbind();
-
-		glfwSwapBuffers(windowHandle); // swap the color buffers
+		renderer.render(this, render);
 	}
 
 	/**
@@ -331,7 +329,7 @@ public class Window {
 		return windowHandle;
 	}
 	
-	public ShaderProgram getShaderProgram() {
-		return shaderProgram;
+	public Renderer getRenderer() {
+		return renderer;
 	}
 }

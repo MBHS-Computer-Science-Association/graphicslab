@@ -2,5 +2,5 @@ package graphicslab;
 
 @FunctionalInterface
 public interface InputRoutine {
-	public void processInput();
+	public void processInput(Window window);
 }
