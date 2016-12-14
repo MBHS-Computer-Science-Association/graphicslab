@@ -8,7 +8,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
+
+import graphicslab.lighting.Material;
+import graphicslab.lighting.PointLight;
 
 public class ShaderProgram {
 	private final int programId;
@@ -40,13 +44,51 @@ public class ShaderProgram {
         uniforms.put(uniformName, uniformLocation);
     }
     
-    public void setUniform(String uniformName, Matrix4f value) {
-        // Dump the matrix into a float buffer
-        FloatBuffer fb = BufferUtils.createFloatBuffer(16);
-        value.get(fb);
-        glUniformMatrix4fv(uniforms.get(uniformName), false, fb);
+    public void createPointLightUniform(String uniformName) throws Exception {
+        createUniform(uniformName + ".color");
+        createUniform(uniformName + ".position");
+        createUniform(uniformName + ".intensity");
+        createUniform(uniformName + ".att.constant");
+        createUniform(uniformName + ".att.linear");
+        createUniform(uniformName + ".att.exponent");
+    }
+    
+    public void createMaterialUniform(String uniformName) throws Exception {
+        createUniform(uniformName + ".color");
+        createUniform(uniformName + ".useColor");
+        createUniform(uniformName + ".reflectance");
+    }
+    
+    public void setUniform(String uniformName, PointLight pointLight) {
+        setUniform(uniformName + ".color", pointLight.getColor() );
+        setUniform(uniformName + ".position", pointLight.getPosition());
+        setUniform(uniformName + ".intensity", pointLight.getIntensity());
+        PointLight.Attenuation att = pointLight.getAttenuation();
+        setUniform(uniformName + ".att.constant", att.getConstant());
+        setUniform(uniformName + ".att.linear", att.getLinear());
+        setUniform(uniformName + ".att.exponent", att.getExponent());
     }
 
+    public void setUniform(String uniformName, Material material) {
+        setUniform(uniformName + ".color", material.getColor() );
+        setUniform(uniformName + ".useColor", material.isTextured() ? 0 : 1);
+        setUniform(uniformName + ".reflectance", material.getReflectance());
+    }
+    
+    public void setUniform(String uniformName, Matrix4f value) {
+        FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
+        value.get(buffer);
+        glUniformMatrix4fv(uniforms.get(uniformName), false, buffer);
+    }
+    
+    public void setUniform(String uniformName, Vector3f value) {
+        glUniform3f(uniforms.get(uniformName), value.x, value.y, value.z);
+    }
+
+    public void setUniform(String uniformName, float value) {
+    	glUniform1f(uniforms.get(uniformName), value);
+    }
+    
     public void setUniform(String uniformName, int value) {
         glUniform1i(uniforms.get(uniformName), value);
     }
@@ -66,14 +108,16 @@ public class ShaderProgram {
 	        if (glGetProgrami(programId, GL_LINK_STATUS) == 0) {
 	            throw new ShaderException("Error linking Shader code: " + glGetProgramInfoLog(programId, 1024));
 	        }
-
-	        glValidateProgram(programId);
-	        if (glGetProgrami(programId, GL_VALIDATE_STATUS) == 0) {
-	            System.err.println("Warning validating Shader code: " + glGetProgramInfoLog(programId, 1024));
-	        }
 	        
 	        shadersLinked = true;
-	    }
+	}
+	 
+	 public void validate() throws ShaderException {
+	        glValidateProgram(programId);
+	        if (glGetProgrami(programId, GL_VALIDATE_STATUS) == 0) {
+	            throw new ShaderValidationException("Warning validating Shader code: " + glGetProgramInfoLog(programId, 1024));
+	        }
+	 }
 	
 	protected int createShader(CharSequence sourcecode, int type) throws ShaderException {
 		int shaderId;
@@ -96,6 +140,10 @@ public class ShaderProgram {
 		glAttachShader(programId, shaderId);
 		
 		return shaderId;
+	}
+	
+	public boolean isLinked() {
+		return isLinked();
 	}
 	
 	public void bind() {
@@ -124,6 +172,15 @@ public class ShaderProgram {
 		private static final long serialVersionUID = -4259370241344527256L;
 
 		public ShaderException(String message) {
+			super(message);
+		}
+	}
+	
+
+	class ShaderValidationException extends RuntimeException {
+		private static final long serialVersionUID = 3223687987511458613L;
+
+		public ShaderValidationException(String message) {
 			super(message);
 		}
 	}

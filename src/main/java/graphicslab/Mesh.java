@@ -11,18 +11,23 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
+
+import graphicslab.ShaderProgram.ShaderException;
+import graphicslab.lighting.Material;
 
 public class Mesh implements Loadable {
 	private int vaoId;
 	private final List<Integer> vboIdList;
 	
-	private Texture texture;
+	private Material material;
 	
 	private final int vertexCount;
 	
 	private FloatBuffer verticesBuffer;
 	private FloatBuffer textureCoordsBuffer;
+	private FloatBuffer normalsBuffer;
 	private IntBuffer indicesBuffer;
 	
 	private boolean loaded;
@@ -41,6 +46,13 @@ public class Mesh implements Loadable {
 				
 		indicesBuffer = BufferUtils.createIntBuffer(indices.length);
 		indicesBuffer.put(indices).flip();
+	}
+	
+	public Mesh(float[] positions, float[] textureCoords, float[] normals, int[] indices) {
+		this(positions, textureCoords, indices);
+		
+		normalsBuffer = BufferUtils.createFloatBuffer(normals.length);
+		normalsBuffer.put(normals).flip();
 	}
 	
 	@Override
@@ -65,6 +77,14 @@ public class Mesh implements Loadable {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexVboId);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL_STATIC_DRAW);
 
+		if (normalsBuffer != null) {
+			int normalsVboId = glGenBuffers();
+			vboIdList.add(normalsVboId);
+			glBindBuffer(GL_ARRAY_BUFFER, normalsVboId);
+			glBufferData(GL_ARRAY_BUFFER, normalsBuffer, GL_STATIC_DRAW);
+			glVertexAttribPointer(2, 3, GL_FLOAT, false, 0, 0);
+		}
+		
 		// Unbinds Buffers and VertexArrays
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
@@ -82,25 +102,42 @@ public class Mesh implements Loadable {
 		}
 		
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture.getId());
+		
+		if (material != null && material.isTextured()) {			
+			glBindTexture(GL_TEXTURE_2D, material.getTextureId());
+		}
 
 		// Bind to the VAO
 	    glBindVertexArray(vaoId);
 	    
 	    glEnableVertexAttribArray(0); // stores position
 	    glEnableVertexAttribArray(1); // stores color
-
+	    if (normalsBuffer != null) {
+	    	glEnableVertexAttribArray(2);
+	    }
 	    
 	    glDrawElements(GL_TRIANGLES, getVertexCount(), GL_UNSIGNED_INT, 0);
 
 	    // Restore state
 	    glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
+        if (normalsBuffer != null) {
+        	glDisableVertexAttribArray(2);
+        }
 	    glBindVertexArray(0);
+	    
+
+		if (material != null && material.isTextured()) {			
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 	}
 	
-	public void setTexture(Texture texture) {
-		this.texture = texture;
+	public void setMaterial(Material material) {
+		this.material = material;
+	}
+	
+	public Material getMaterial() {
+		return material;
 	}
 	
 	@Override
@@ -125,8 +162,6 @@ public class Mesh implements Loadable {
         for (int vboId : vboIdList) {
             glDeleteBuffers(vboId);
         }
-
-        texture.cleanup();
         
         // Delete the VAO
         glBindVertexArray(0);

@@ -8,39 +8,35 @@ import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL11.glViewport;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.lwjgl.opengl.GL;
+
+import graphicslab.window.RenderRoutine;
+import graphicslab.window.Window;
 
 public class Renderer {
 	private ShaderProgram shaderProgram;
-	
-	private RenderRoutine renderRoutine;
-	
+
 	public Renderer() {
 		
 	}
 	
 	public void init() {
-		GL.createCapabilities();
 		
+		
+		GL.createCapabilities();
 		
 	    try {
 			shaderProgram = new ShaderProgram();
-		} catch (Exception e1) {
-			e1.printStackTrace();
-		}
-
-	    try {
 			shaderProgram.createVertexShader(Utils.loadResource("src/main/res/vertex.vs"));
 			shaderProgram.createFragmentShader(Utils.loadResource("src/main/res/fragment.fs"));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	    try {
 			shaderProgram.link();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	    
+
 	    glEnable(GL_DEPTH_TEST);
 	}
 	
@@ -60,7 +56,7 @@ public class Renderer {
 		
 		shaderProgram.unbind();
 
-		glfwSwapBuffers(window.getWindowHandle()); // swap the color buffers
+		glfwSwapBuffers(window.getPointer()); // swap the color buffers
 	}
 	
 	public void setShaderProgram(ShaderProgram shaderProgram) {
