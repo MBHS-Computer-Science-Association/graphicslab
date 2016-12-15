@@ -17,8 +17,8 @@ import org.lwjgl.openal.ALC;
 import org.lwjgl.openal.ALC10;
 import org.lwjgl.openal.ALCCapabilities;
 
-import graphicslab.sound.AudioManager;
-import graphicslab.sound.SoundBuffer;
+import graphicslab.audio.AudioContext;
+import graphicslab.audio.SoundBuffer;
 import graphicslab.window.Window;
 import graphicslab.window.input.KeyboardInput;
 
@@ -29,7 +29,7 @@ public class AudioTest {
 
 	public static void main(String[] args) {
 		
-		AudioManager manager = new AudioManager();
+		AudioContext manager = new AudioContext();
 		try {
 			manager.init();
 		} catch (Exception e) {
@@ -45,7 +45,7 @@ public class AudioTest {
 		}
 		
 		int sourceId = alGenSources();
-		alSourcei(sourceId, AL_BUFFER, buffer.getBufferId());
+		alSourcei(sourceId, AL_BUFFER, buffer.getId());
 		
 		alDistanceModel(AL11.AL_LINEAR_DISTANCE);
 		

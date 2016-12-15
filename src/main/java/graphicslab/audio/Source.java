@@ -1,21 +1,32 @@
-package graphicslab.sound;
+package graphicslab.audio;
 
 import static org.lwjgl.openal.AL10.*;
 
 import org.joml.Vector3f;
 
-public class SoundSource {
+import graphicslab.Initializable;
 
-    private final int sourceId;
+public class Source implements Initializable {
+
+    private int sourceId;
     private Vector3f position;
     private Vector3f velocity;
+    
+    private boolean looping;
+    private boolean relative;
 
-    public SoundSource(boolean loop, boolean relative) {
+    public Source(boolean looping, boolean relative) {
     	this.position = new Vector3f();
     	this.velocity = new Vector3f();
     	
+    	this.looping = looping;
+    	this.relative = relative;
+    }
+    
+    @Override
+    public void init() {
         this.sourceId = alGenSources();
-        if (loop) {
+        if (looping) {
             alSourcei(sourceId, AL_LOOPING, AL_TRUE);
         }
         if (relative) {
@@ -50,16 +61,13 @@ public class SoundSource {
         alSourcef(sourceId, AL_GAIN, gain);
     }
 
-    public void setProperty(int param, float value) {
-        alSourcef(sourceId, param, value);
-    }
-
-    public void play() {
-        alSourcePlay(sourceId);
-    }
 
     public boolean isPlaying() {
         return alGetSourcei(sourceId, AL_SOURCE_STATE) == AL_PLAYING;
+    }
+
+    public void play() {
+    	alSourcePlay(sourceId);
     }
 
     public void pause() {
@@ -70,6 +78,10 @@ public class SoundSource {
         alSourceStop(sourceId);
     }
 
+    public int getId() {
+    	return sourceId;
+    }
+    
     public void cleanup() {
         stop();
         alDeleteSources(sourceId);

@@ -1,23 +1,31 @@
-package graphicslab.sound;
+package graphicslab.audio;
 
 import org.joml.Vector3f;
 
+import graphicslab.Initializable;
+
 import static org.lwjgl.openal.AL10.*;
 
-public class SoundListener {
+/**
+ * The listener is an object representation of the OpenAL listener. For each context, there is only one listener that can receive data.
+ * The pitches of sound sources are affected by velocity and position of both the sources and the listener.
+ *
+ */
+public class Listener implements Initializable {
 
 	private final Vector3f position;
 	private final Vector3f velocity;
 	
-    public SoundListener() {
+    public Listener() {
         this(new Vector3f(0, 0, 0));
     }
 
-    public SoundListener(Vector3f position) {
+    public Listener(Vector3f position) {
     	this.position = position;
     	this.velocity = new Vector3f();
     }
     
+    @Override
     public void init() {    	
     	alListener3f(AL_POSITION, position.x, position.y, position.z);
     	alListener3f(AL_VELOCITY, 0, 0, 0);

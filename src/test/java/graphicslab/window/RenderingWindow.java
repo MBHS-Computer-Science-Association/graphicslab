@@ -12,9 +12,9 @@ import graphicslab.Camera;
 import graphicslab.Item;
 import graphicslab.ShaderProgram;
 import graphicslab.Transformation;
+import graphicslab.audio.AudioContext;
 import graphicslab.lighting.PointLight;
 import graphicslab.lighting.PointLight.Attenuation;
-import graphicslab.sound.AudioManager;
 import graphicslab.window.Window;
 import graphicslab.window.input.KeyboardInput;
 import graphicslab.window.input.MouseInput;
@@ -26,7 +26,7 @@ public class RenderingWindow extends Window{
 	public Camera camera;
 	public MouseInput mouse;
 	public List<PointLight> pointLights;
-	public AudioManager soundManager;
+	public AudioContext soundManager;
 
 	
 	
@@ -37,7 +37,7 @@ public class RenderingWindow extends Window{
 		camera = new Camera(new Vector3f(), new Vector3f());
 		mouse = new MouseInput();
 		pointLights = new ArrayList<>();
-		soundManager = new AudioManager();
+		soundManager = new AudioContext();
 		keyboard = new KeyboardInput();
 	}
 	

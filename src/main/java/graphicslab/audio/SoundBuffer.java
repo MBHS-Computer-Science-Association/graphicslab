@@ -1,4 +1,4 @@
-package graphicslab.sound;
+package graphicslab.audio;
 
 import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -71,7 +71,7 @@ public class SoundBuffer implements Loadable {
 		return isLoaded;
 	}
 	
-    public int getBufferId() {
+    public int getId() {
     	if (!isLoaded()) {
     		load();
     	}

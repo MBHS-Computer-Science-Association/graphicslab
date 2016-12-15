@@ -1,4 +1,4 @@
-package graphicslab.sound;
+package graphicslab.audio;
 
 import java.nio.IntBuffer;
 import java.nio.ByteBuffer;
@@ -21,22 +21,25 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.openal.ALC10.*;
 import static org.lwjgl.openal.AL10.*;
 
-
-public class AudioManager {
+/**
+ * Represents an OpenAL audio device context. It manages {@link SoundBuffer}, {@link Source}, and the {@link Listener} as objects.
+ * It handles initialization and termination of the OpenAL system. All of the sound buffer resources are shared in an OpenAL context.
+ */
+public class AudioContext {
 
     private long device;
     private long context;
 
-    private SoundListener listener;
+    private Listener listener;
 
     private final List<SoundBuffer> soundBufferList;
 
-    private final Map<String, SoundSource> soundSourceMap;
+    private final Map<String, Source> soundSourceMap;
 
-    public AudioManager() {
+    public AudioContext() {
         soundBufferList = new ArrayList<>();
         soundSourceMap = new HashMap<>();
-        listener = new SoundListener();
+        listener = new Listener();
     }
 
     public void init() throws Exception {
@@ -54,34 +57,19 @@ public class AudioManager {
         AL.createCapabilities(deviceCaps);
     }
 
-    public void addSoundSource(String name, SoundSource soundSource) {
+    public void addSoundSource(String name, Source soundSource) {
         this.soundSourceMap.put(name, soundSource);
-    }
-
-    public SoundSource getSoundSource(String name) {
-        return this.soundSourceMap.get(name);
-    }
-
-    public void playSoundSource(String name) {
-        SoundSource soundSource = this.soundSourceMap.get(name);
-        if (soundSource != null && !soundSource.isPlaying()) {
-            soundSource.play();
-        }
-    }
-
-    public void removeSoundSource(String name) {
-        this.soundSourceMap.remove(name);
     }
 
     public void addSoundBuffer(SoundBuffer soundBuffer) {
         this.soundBufferList.add(soundBuffer);
     }
 
-    public SoundListener getListener() {
+    public Listener getListener() {
         return this.listener;
     }
 
-    public void setListener(SoundListener listener) {
+    public void setListener(Listener listener) {
         this.listener = listener;
     }
 
@@ -101,7 +89,7 @@ public class AudioManager {
         }
         soundBufferList.clear();
         
-        for (SoundSource soundSource : soundSourceMap.values()) {
+        for (Source soundSource : soundSourceMap.values()) {
             soundSource.cleanup();
         }
         soundSourceMap.clear();

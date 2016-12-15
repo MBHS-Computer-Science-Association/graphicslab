@@ -9,14 +9,15 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.openal.AL10;
 
 import static org.lwjgl.glfw.GLFW.*;
 
+import graphicslab.audio.SoundBuffer;
+import graphicslab.audio.Source;
 import graphicslab.lighting.Material;
 import graphicslab.lighting.PointLight;
 import graphicslab.lighting.PointLight.Attenuation;
-import graphicslab.sound.SoundBuffer;
-import graphicslab.sound.SoundSource;
 import graphicslab.window.RenderingWindow;
 import graphicslab.window.Window;
 
@@ -92,11 +93,6 @@ public class FreeformTesting {
 	        	rwindow.camera.moveRotation(0, -1.0f, 0);
 	        }
 	        
-	        if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_O)) {
-	        	rw.soundManager.getSoundSource("test1").setGain(0.0f);
-	        }
-	        
-	        
 			if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_LEFT_SHIFT)) {
 				rwindow.camera.movePosition(0, 1.0f, 0);
 			}
@@ -150,8 +146,9 @@ public class FreeformTesting {
 			if (rw.keyboard.isKeyPressed(GLFW_KEY_B)) {
 				SoundingItem item = new SoundingItem(cube);
 				
-				SoundSource source = item.getSoundSource();
-				source.setBuffer(buffBack.getBufferId());
+				Source source = item.getSoundSource();
+				source.init();
+				source.setBuffer(buffBack.getId());
 				source.play();
 				
 				item.setScale(0.25f);
@@ -261,6 +258,9 @@ public class FreeformTesting {
 		testWindow.createWindow();
 		testWindow.showWindow();
 		testWindow.startLoop();
+		
+		rw.soundManager.cleanup();
+		
 	}
 	
 	public static int getWindowDebugState(Window window) {

@@ -2,17 +2,17 @@ package graphicslab;
 
 import org.joml.Vector3f;
 
-import graphicslab.sound.SoundSource;
+import graphicslab.audio.Source;
 
 public class SoundingItem extends Item {
 
-	private final SoundSource sound;
+	private final Source sound;
 	private final Vector3f velocity;
 	
 	public SoundingItem(Mesh mesh) {
 		super(mesh);
 		velocity = new Vector3f();
-		sound = new SoundSource(true, false);
+		sound = new Source(true, false);
 	}
 	
 	public void update() {
@@ -20,7 +20,7 @@ public class SoundingItem extends Item {
 		sound.setPosition(super.getPosition());
 	}
 	
-	public SoundSource getSoundSource() {
+	public Source getSoundSource() {
 		return sound;
 	}
 	
