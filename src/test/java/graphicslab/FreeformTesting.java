@@ -1,6 +1,8 @@
 package graphicslab;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -68,9 +70,10 @@ public class FreeformTesting {
 				shaderProgram.createUniform("modelViewMatrix");
 				shaderProgram.createUniform("texture_sampler");
 				shaderProgram.createMaterialUniform("material");
+				
 				shaderProgram.createUniform("specularPower");
 				shaderProgram.createUniform("ambientLight");
-				shaderProgram.createPointLightUniform("pointLight");
+				shaderProgram.createPointLightListUniform("pointLights", 4);
 				
 		        shaderProgram.createUniform("debug");
 			} catch (Exception e) {
@@ -151,7 +154,7 @@ public class FreeformTesting {
 				source.setBuffer(buffBack.getId());
 				source.play();
 				
-				item.setScale(0.25f);
+				item.setScale(5f);
 				
 				x = r.nextFloat() * 1000 - 500;
 				y = 500;
@@ -229,19 +232,45 @@ public class FreeformTesting {
 	        shaderProgram.setUniform("specularPower", specularPower);
 	        
 	        Matrix4f viewMatrix = transformation.getViewMatrix(camera);
-
-	        PointLight pointLight = new PointLight(new Vector3f(1.0f, 1.0f, 1.0f), new Vector3f(0, -200, 0), 100.0f);
+	        
+	        List<PointLight> pointLights = new ArrayList<>();
+	        
+	        PointLight pointLight = new PointLight(new Vector3f(0.0f, 1.0f, 1.0f), new Vector3f(0, -200, 0), 50.0f);
 	        Attenuation att = pointLight.new Attenuation(0.01f, 0.001f, 0.001f);
 	        pointLight.setAttenuation(att);
+	        pointLights.add(pointLight);
 	        
-	        PointLight currPointLight = new PointLight(pointLight);
-	        Vector3f lightPos = currPointLight.getPosition();
-	        Vector4f aux = new Vector4f(lightPos, 1);
-	        aux.mul(viewMatrix);
-	        lightPos.x = aux.x;
-	        lightPos.y = aux.y;
-	        lightPos.z = aux.z;
-	        shaderProgram.setUniform("pointLight", currPointLight);
+	        float x = r.nextFloat() * 1000 - 500;
+	        float y = r.nextFloat() * 1000 - 500;
+	        float z = r.nextFloat() * 1000 - 500;
+
+	        float red = r.nextFloat();
+	        float green = r.nextFloat();
+	        float blue = r.nextFloat();
+	        
+	        PointLight pointLight2 = new PointLight(new Vector3f(red, green, blue), new Vector3f(x, y, z), 100.f);
+	        pointLight2.setAttenuation(att);
+	        pointLights.add(pointLight2);
+	        
+	        PointLight pointLight3 = new PointLight(new Vector3f(0.0f, 0.0f, 1.0f), new Vector3f(camera.getPosition()), 50.0f);
+	        pointLight3.setAttenuation(att);
+	        pointLights.add(pointLight3);
+
+	        PointLight pointLight4 = new PointLight(new Vector3f(1.0f, 0.0f, 1.0f), new Vector3f(0, 400, 0), 50.0f);
+	        pointLight4.setAttenuation(att);
+	        pointLights.add(pointLight4);
+	        
+	        for (int i = 0; i < pointLights.size(); i++) {
+	        	PointLight currPointLight = new PointLight(pointLights.get(i));
+	        	Vector3f lightPos = currPointLight.getPosition();
+	        	Vector4f aux = new Vector4f(lightPos, 1);
+	        	aux.mul(viewMatrix);
+	        	lightPos.x = aux.x;
+	        	lightPos.y = aux.y;
+	        	lightPos.z = aux.z;
+	        	shaderProgram.setUniform("pointLights", currPointLight, i);	      
+	        }
+	        
 
 	        shaderProgram.setUniform("debug", getWindowDebugState(window));
 			
