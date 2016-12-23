@@ -24,19 +24,8 @@ public class Renderer {
 	}
 	
 	public void init() {
-		
-		
 		GL.createCapabilities();
 		
-	    try {
-			shaderProgram = new ShaderProgram();
-			shaderProgram.createVertexShader(Utils.loadResource("src/main/res/vertex.vs"));
-			shaderProgram.createFragmentShader(Utils.loadResource("src/main/res/fragment.fs"));
-			shaderProgram.link();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
 	    glEnable(GL_DEPTH_TEST);
 	}
 	

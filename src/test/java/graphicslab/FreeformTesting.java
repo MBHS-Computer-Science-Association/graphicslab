@@ -63,9 +63,16 @@ public class FreeformTesting {
 	    
 		
 		testWindow.setInitializeRoutine((window) -> {
-			ShaderProgram shaderProgram = window.getRenderer().getShaderProgram();
-		    
+			Renderer renderer = window.getRenderer();
+			
+			ShaderProgram shaderProgram = null;
+
+			
 		    try {
+		    	shaderProgram = new ShaderProgram();
+		    	shaderProgram.createVertexShader(Utils.loadResource("src/main/res/vertex.vs"));
+		    	shaderProgram.createFragmentShader(Utils.loadResource("src/main/res/fragment.fs"));
+		    	shaderProgram.link();
 				shaderProgram.createUniform("projectionMatrix");
 				shaderProgram.createUniform("modelViewMatrix");
 				shaderProgram.createUniform("texture_sampler");
@@ -79,6 +86,8 @@ public class FreeformTesting {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		    
+		    renderer.setShaderProgram(shaderProgram);
 		});
 		
 		testWindow.setInputRoutine((window) -> {
@@ -154,7 +163,7 @@ public class FreeformTesting {
 				source.setBuffer(buffBack.getId());
 				source.play();
 				
-				item.setScale(5f);
+				item.setScale(0.25f);
 				
 				x = r.nextFloat() * 1000 - 500;
 				y = 500;
@@ -239,10 +248,12 @@ public class FreeformTesting {
 	        Attenuation att = pointLight.new Attenuation(0.01f, 0.001f, 0.001f);
 	        pointLight.setAttenuation(att);
 	        pointLights.add(pointLight);
+	       
+	        float x = 0, y = 0, z = 0;
 	        
-	        float x = r.nextFloat() * 1000 - 500;
-	        float y = r.nextFloat() * 1000 - 500;
-	        float z = r.nextFloat() * 1000 - 500;
+//	        float x = r.nextFloat() * 1000 - 500;
+//	        float y = r.nextFloat() * 1000 - 500;
+//	        float z = r.nextFloat() * 1000 - 500;
 
 	        float red = r.nextFloat();
 	        float green = r.nextFloat();
