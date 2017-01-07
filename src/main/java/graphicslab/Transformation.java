@@ -4,9 +4,11 @@ package graphicslab;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-public class Transformation {
+public final class Transformation {
 
     private final Matrix4f projectionMatrix;
+    
+    private final Matrix4f ortho2DProjectionMatrix;
 
     private final Matrix4f worldMatrix;
     
@@ -14,9 +16,13 @@ public class Transformation {
     
     private final Matrix4f modelViewMatrix;
 
+    private final Matrix4f orthoProjectionMatrix;
+
     public Transformation() {
         worldMatrix = new Matrix4f();
         projectionMatrix = new Matrix4f();
+        ortho2DProjectionMatrix = new Matrix4f();
+        orthoProjectionMatrix = new Matrix4f();
         viewMatrix = new Matrix4f(); 
         modelViewMatrix = new Matrix4f(); 
     }
@@ -27,9 +33,21 @@ public class Transformation {
         projectionMatrix.perspective(fov, aspectRatio, zNear, zFar);
         return projectionMatrix;
     }
+    
+    public final Matrix4f getOrtho2DProjectionMatrix(float left, float right, float bottom, float top) {
+        ortho2DProjectionMatrix.identity();
+        ortho2DProjectionMatrix.ortho2D(left, right, bottom, top);
+        return ortho2DProjectionMatrix;
+    }
+    
+    public final Matrix4f getOrthoProjectionMatrix(float left, float right, float bottom, float top, float zNear, float zFar) {
+        orthoProjectionMatrix.identity();
+        orthoProjectionMatrix.ortho(left, right, bottom, top, zNear, zFar);
+        return orthoProjectionMatrix;
+    }
 
     @Deprecated
-    public Matrix4f getWorldMatrix(Vector3f offset, Vector3f rotation, float scale) {
+    public final Matrix4f getWorldMatrix(Vector3f offset, Vector3f rotation, float scale) {
         worldMatrix.identity().translate(offset).
                 rotateX((float)Math.toRadians(rotation.x)).
                 rotateY((float)Math.toRadians(rotation.y)).
@@ -38,7 +56,7 @@ public class Transformation {
         return worldMatrix;
     }
     
-    public Matrix4f getModelViewMatrix(Item item, Matrix4f viewMatrix) {
+    public final Matrix4f getModelViewMatrix(Item item, Matrix4f viewMatrix) {
         Vector3f rotation = item.getRotation();
         modelViewMatrix.identity().translate(item.getPosition()).
             rotateX((float)Math.toRadians(-rotation.x)).
@@ -49,7 +67,7 @@ public class Transformation {
         return viewCurr.mul(modelViewMatrix);
     }
     
-    public Matrix4f getViewMatrix(Camera camera) {
+    public final Matrix4f getViewMatrix(Camera camera) {
         Vector3f cameraPos = camera.getPosition();
         Vector3f rotation = camera.getRotation();
         

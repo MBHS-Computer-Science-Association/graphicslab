@@ -33,6 +33,8 @@ public class Mesh implements Loadable {
 	private boolean loaded;
 	
 	public Mesh(float[] positions, float[] textureCoords, int[] indices) {
+	    this.material = new Material();
+	    
 		loaded = false;
 		
 		vboIdList = new ArrayList<>();
@@ -133,7 +135,9 @@ public class Mesh implements Loadable {
 	}
 	
 	public void setMaterial(Material material) {
-		this.material = material;
+	    if (material != null) {
+	        this.material = material;	        
+	    }
 	}
 	
 	public Material getMaterial() {

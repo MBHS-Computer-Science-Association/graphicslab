@@ -45,16 +45,13 @@ struct Material
     float reflectance;
 };
 
-// Unused for now
-uniform int debug;
-
+uniform Material material;
 uniform sampler2D texture_sampler;
 
 uniform vec3 ambientLight;
 
 uniform float specularPower;
 
-uniform Material material;
 
 uniform DirectionalLight directionalLight;
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
@@ -157,28 +154,5 @@ void main()
         }
     }
 
-	if (debug == 1)
-	{
-		fragColor = vec4(0.0, 1.0, 1.0, 1.0);
-	}
-	else if (debug == 2)
-	{
-		fragColor = totalLight;
-	}
-	else if (debug == 3)
-	{
-		fragColor = baseColor;
-	}
-	else if (debug == 4)
-	{
-		fragColor = vec4(material.color, 1);
-	}
-	else if (debug == 5)
-	{
-		fragColor = totalLight * vec4(1.0, 0.0, 0.0, 0.0);
-	}
-	else
-	{
-        fragColor = baseColor * totalLight;
-	}
+    fragColor = baseColor * totalLight;
 }

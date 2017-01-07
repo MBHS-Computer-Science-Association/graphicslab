@@ -13,7 +13,7 @@ import static org.lwjgl.stb.STBVorbis.*;
 import org.lwjgl.stb.STBVorbisInfo;
 
 import graphicslab.Loadable;
-import graphicslab.Utils;
+import graphicslab.util.Utils;
 
 public class SoundBuffer implements Loadable {
 	private int bufferId;

@@ -1,4 +1,4 @@
-package graphicslab;
+package graphicslab.util;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -20,6 +20,14 @@ import org.lwjgl.BufferUtils;
 
 public class Utils {
 
+    public static float[] listToArray(List<Float> list) {
+        float[] result = new float[list != null ? list.size() : 0];
+        for (int i = 0; i < list.size(); i++) {
+            result[i] = list.get(i);
+        }
+        return result;
+    }
+    
 	public static String loadResource(String fileName) throws IOException {
 		String result = "";
 		try (InputStream in = new FileInputStream(fileName)) {

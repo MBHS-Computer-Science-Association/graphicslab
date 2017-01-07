@@ -4,10 +4,15 @@ import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.lwjgl.opengl.GL11.*;
 
 import org.lwjgl.glfw.GLFWFramebufferSizeCallbackI;
 
-import graphicslab.Renderer;
+import graphicslab.window.input.InputHandler;
+
 
 /**
  * Represents a window on the screen similar to {@link JFrame}. Provides an
@@ -37,12 +42,12 @@ public class Window {
 
 	private GLFWFramebufferSizeCallbackI sizecallback;
 	
-	private Renderer renderer; 
-	
 	private InitializeRoutine init;
 	private RenderRoutine render;
 	private StateRoutine state;
 	private InputRoutine input;
+	
+	private Set<InputHandler> inputHandlers;
 	
 	/**
 	 * Constructs and creates the window on the current thread. Window must be
@@ -80,7 +85,8 @@ public class Window {
 		this.width = width;
 		this.height = height;
 		this.title = title;
-		this.renderer = new Renderer();
+		
+		this.inputHandlers = new HashSet<>();
 		
 		if (createWindow) {
 			createWindow();
@@ -99,7 +105,9 @@ public class Window {
 		glfwMakeContextCurrent(windowHandle);
 		glfwSwapInterval(1);
 		
-		renderer.init();
+		for (InputHandler handler : inputHandlers) {
+		    handler.init(this);
+		}
 		
 		if (init != null) {
 			init.initialize(this);
@@ -186,10 +194,18 @@ public class Window {
 		destroyWindow();
 	}
 
+	public void addInputHandler(InputHandler handler) {
+	    inputHandlers.add(handler);
+	}
+	
 	protected void input() {
 		// Poll for window events. The key callback above will only be
 		// invoked during this call.
 		glfwPollEvents();
+		
+		for (InputHandler handler : inputHandlers) {
+		    handler.input();
+		}
 		
 		if (input != null) {			
 			input.processInput(this);
@@ -202,9 +218,20 @@ public class Window {
 		}
 	}
 
-	protected void render() {
-		renderer.render(this, render);
-	}
+    protected void render() {
+
+        if (isResized()) {
+            glViewport(0, 0, getWidth(), getHeight());
+            setResized(false);
+        }
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the
+                                                            // framebuffer
+        if (render != null) {
+            render.loop(this);
+        }
+        swapBuffers();
+    }
 
 	/**
 	 * Waits an appropriate amount of time before doing the next rendering sequence. This prevents the graphics application from running too quickly.
@@ -220,6 +247,10 @@ public class Window {
 				ie.printStackTrace();
 			}
 		}
+	}
+	
+	private void swapBuffers() {
+	    glfwSwapBuffers(windowHandle);
 	}
 
 	/**
@@ -250,6 +281,14 @@ public class Window {
 	
 	public void setResized(boolean resized) {
 		this.resized = resized;
+	}
+	
+	public void setCursorInputMode(int value) {
+	    glfwSetInputMode(windowHandle, GLFW_CURSOR, value);
+	}
+	
+	public void setWindowShouldClose(boolean value) {
+	    glfwSetWindowShouldClose(windowHandle, value);
 	}
 	
 	/**
@@ -292,9 +331,5 @@ public class Window {
 	 */
 	public long getPointer() {
 		return windowHandle;
-	}
-	
-	public Renderer getRenderer() {
-		return renderer;
 	}
 }

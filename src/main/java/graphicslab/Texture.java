@@ -50,6 +50,14 @@ public class Texture implements Loadable {
 		return loaded;
 	}
 	
+	public int getWidth() {
+	    return width;
+	}
+	
+	public int getHeight() {
+	    return height;
+	}
+	
 	public int getId() {
 		if (!isLoaded()) {
 			load();

@@ -15,13 +15,17 @@ import org.lwjgl.openal.AL10;
 
 import static org.lwjgl.glfw.GLFW.*;
 
+import graphicslab.assets.Cube;
+import graphicslab.audio.AudioContext;
 import graphicslab.audio.SoundBuffer;
 import graphicslab.audio.Source;
 import graphicslab.lighting.Material;
 import graphicslab.lighting.PointLight;
 import graphicslab.lighting.PointLight.Attenuation;
-import graphicslab.window.RenderingWindow;
+import graphicslab.util.Utils;
 import graphicslab.window.Window;
+import graphicslab.window.input.KeyboardInput;
+import graphicslab.window.input.MouseInput;
 
 public class FreeformTesting {
 	static SoundBuffer buffBack = null;
@@ -34,8 +38,22 @@ public class FreeformTesting {
 	}
 
 	public static void main(String[] args) throws Exception {
-		final Window testWindow = new RenderingWindow(800, 600, "A window.");
-	    
+		final Window testWindow = new Window(800, 600, "A window.");
+	    final Renderer renderer = new Renderer();
+		final AudioContext soundManager = new AudioContext();
+		
+		final Transformation transformation = new Transformation();
+		
+		final Camera camera = new Camera();
+		
+		final Scene3D scene1 = new Scene3D();
+		
+		final KeyboardInput keyboard = new KeyboardInput(testWindow);
+		final MouseInput mouse = new MouseInput(testWindow);
+		
+
+        List<Item> items = scene1.getItems();
+		
 	    Mesh cube = OBJLoader.loadMesh("src/test/cube.obj");
 	    Texture grass = new Texture("src/test/grassblock.png");
 	    Material grassBlockMaterial = new Material(grass, 1f);
@@ -50,8 +68,6 @@ public class FreeformTesting {
 	    Material bunnyMaterial = new Material(new Vector3f(0.5f, 0.5f, 0.7f), 1f);
 	    bunnyMesh.setMaterial(bunnyMaterial);
 	    
-	    RenderingWindow rw = (RenderingWindow) testWindow;
-	    
 //	    Item bunnyItem = new Item(bunnyMesh);
 //	    bunnyItem.setScale(100f);
 //	    bunnyItem.setPosition(new Vector3f(0, -50f, -300f));
@@ -59,11 +75,16 @@ public class FreeformTesting {
 	    
 	    Item skyboxItem = new Item(skybox);
 	    skyboxItem.setScale(500f);
-	    rw.items.add(skyboxItem);
+	    scene1.getItems().add(skyboxItem);
 	    
 		
 		testWindow.setInitializeRoutine((window) -> {
-			Renderer renderer = window.getRenderer();
+			renderer.init();
+			try {
+                soundManager.init();
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
 			
 			ShaderProgram shaderProgram = null;
 
@@ -73,6 +94,9 @@ public class FreeformTesting {
 		    	shaderProgram.createVertexShader(Utils.loadResource("src/main/res/vertex.vs"));
 		    	shaderProgram.createFragmentShader(Utils.loadResource("src/main/res/fragment.fs"));
 		    	shaderProgram.link();
+		    	renderer.setShaderProgram(shaderProgram);
+
+		    	
 				shaderProgram.createUniform("projectionMatrix");
 				shaderProgram.createUniform("modelViewMatrix");
 				shaderProgram.createUniform("texture_sampler");
@@ -87,75 +111,66 @@ public class FreeformTesting {
 				e.printStackTrace();
 			}
 		    
-		    renderer.setShaderProgram(shaderProgram);
 		});
 		
 		testWindow.setInputRoutine((window) -> {
-			RenderingWindow rwindow = (RenderingWindow) window;
-
 			
 			final float MOUSE_SENSITIVITY = 1.0f;
 			
-	        Vector2f rotVec = rwindow.mouse.getDisplVec();
-	        rwindow.camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
+	        Vector2f rotVec = mouse.getDisplVec();
+	        camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
 			
-	        // Crazy camera!
-	        if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_P)) {
-	        	rwindow.camera.moveRotation(1.0f, 0, 0);
-	        	rwindow.camera.moveRotation(0, -1.0f, 0);
-	        }
-	        
-			if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_LEFT_SHIFT)) {
-				rwindow.camera.movePosition(0, 1.0f, 0);
+			if (keyboard.isKeyPressed(GLFW.GLFW_KEY_LEFT_SHIFT)) {
+				camera.movePosition(0, 1.0f, 0);
 			}
 			
-			if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_LEFT_CONTROL)) {
-				rwindow.camera.movePosition(0, -1.0f, 0);
+			if (keyboard.isKeyPressed(GLFW.GLFW_KEY_LEFT_CONTROL)) {
+				camera.movePosition(0, -1.0f, 0);
 			}
 
-			if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_A)) {
-				rwindow.camera.movePosition(-1.0f, 0, 0);
+			if (keyboard.isKeyPressed(GLFW.GLFW_KEY_A)) {
+				camera.movePosition(-1.0f, 0, 0);
 			}
 			
-			if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_D)) {
-				rwindow.camera.movePosition(1.0f, 0, 0);
+			if (keyboard.isKeyPressed(GLFW.GLFW_KEY_D)) {
+				camera.movePosition(1.0f, 0, 0);
 			}
 			
-			if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_W)) {
-				rwindow.camera.movePosition(0, 0, -1.0f);
+			if (keyboard.isKeyPressed(GLFW.GLFW_KEY_W)) {
+				camera.movePosition(0, 0, -1.0f);
 			}
 			
-			if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_S)) {
-				rwindow.camera.movePosition(0, 0, 1.0f);
+			if (keyboard.isKeyPressed(GLFW.GLFW_KEY_S)) {
+				camera.movePosition(0, 0, 1.0f);
 			}
 			
-			if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_M)) {
+			if (keyboard.isKeyPressed(GLFW.GLFW_KEY_M)) {
 				glfwSetInputMode(window.getPointer(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			}
 			
-			if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_N)) {
+			if (keyboard.isKeyPressed(GLFW.GLFW_KEY_N)) {
 				glfwSetInputMode(window.getPointer(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 			}
 			
-			if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_K)) {				
-				rwindow.items.get(0).setScale(rwindow.items.get(0).getScale() - 1f);
+			
+			if (keyboard.isKeyPressed(GLFW.GLFW_KEY_K)) {				
+				items.get(0).setScale(items.get(0).getScale() - 1f);
 			}
 			
-			if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_L)) {				
-				rwindow.items.get(0).setScale(rwindow.items.get(0).getScale() + 1f);
+			if (keyboard.isKeyPressed(GLFW.GLFW_KEY_L)) {				
+				items.get(0).setScale(items.get(0).getScale() + 1f);
 			}
+			
 		});
 		
 		Random r = new Random();
 		
 		testWindow.setStateRoutine((window) -> {
-			RenderingWindow rwindow = (RenderingWindow) window;
-			
-			rw.soundManager.updateListenerPosition(rw.camera);
+			soundManager.updateListenerPosition(camera);
 			
 			float x, y, z;
 			
-			if (rw.keyboard.isKeyPressed(GLFW_KEY_B)) {
+			if (keyboard.isKeyPressed(GLFW_KEY_B)) {
 				SoundingItem item = new SoundingItem(cube);
 				
 				Source source = item.getSoundSource();
@@ -163,7 +178,7 @@ public class FreeformTesting {
 				source.setBuffer(buffBack.getId());
 				source.play();
 				
-				item.setScale(0.25f);
+				item.setScale(15f);
 				
 				x = r.nextFloat() * 1000 - 500;
 				y = 500;
@@ -174,12 +189,13 @@ public class FreeformTesting {
 				y = r.nextFloat() * 360;
 				z = r.nextFloat() * 360;
 				item.setRotation(new Vector3f(x, y, z));
-				rwindow.items.add(item);
+				
+				items.add(item);
 			}
 			
 			Set<Item> removeSet = new HashSet<>();
 			
-			for (Item i : rwindow.items) {
+			for (Item i : items) {
 				if (i instanceof SoundingItem) {
 					SoundingItem sitem = (SoundingItem) i;
 					
@@ -203,6 +219,24 @@ public class FreeformTesting {
 					sitem.getVelocity().add(0, -0.5f * factor + factor2, 0);
 					sitem.update();
 				}
+
+                if (i instanceof Cube) {
+                    
+                    Vector3f rot = i.getRotation();
+                    
+                    x = r.nextFloat() * 0.5f;
+                    y = r.nextFloat() * 0.5f;
+                    z = r.nextFloat() * 0.5f;
+                    
+                    i.setRotation(new Vector3f(rot.x + x, rot.y + y, rot.z + z));
+
+                    if (i.getPosition().y < -800) {
+                        removeSet.add(i);
+                    }
+                    Vector3f direction = new Vector3f(0, -500, 0).sub(i.getPosition());
+                    Vector3f position = i.getPosition();
+                    
+                }
 			}
 			
 			for (Item i : removeSet) {
@@ -211,18 +245,17 @@ public class FreeformTesting {
 					sitem.getSoundSource().stop();
 					sitem.getSoundSource().cleanup();
 				}
-				rw.items.remove(i);
+				items.remove(i);
 			}
 			
 		});
 		
 		
 		testWindow.setRenderRoutine((window) -> {
-			RenderingWindow rwindow = (RenderingWindow) window;
-			ShaderProgram shaderProgram = window.getRenderer().getShaderProgram();
-			Camera camera = rwindow.camera;
-			Transformation transformation = rwindow.transformation;
+			ShaderProgram shaderProgram = renderer.getShaderProgram();
 
+			renderer.begin();
+			
 		    /**
 		     * Field of View in Radians
 		     */
@@ -283,9 +316,9 @@ public class FreeformTesting {
 	        }
 	        
 
-	        shaderProgram.setUniform("debug", getWindowDebugState(window));
-			
-			for (Item item : rwindow.items) {
+	        shaderProgram.setUniform("debug", getWindowDebugState(keyboard));
+				        
+			for (Item item : items) {
 				Matrix4f modelViewMatrix = transformation.getModelViewMatrix(item, viewMatrix);
 				
 		        shaderProgram.setUniform("modelViewMatrix", modelViewMatrix);
@@ -293,29 +326,30 @@ public class FreeformTesting {
 		        
 				item.getMesh().render();
 			}
+			
+			renderer.end();
 		});
 		
 		testWindow.createWindow();
 		testWindow.showWindow();
 		testWindow.startLoop();
 		
-		rw.soundManager.cleanup();
+		soundManager.cleanup();
 		
 	}
 	
-	public static int getWindowDebugState(Window window) {
-		RenderingWindow rw = (RenderingWindow) window;
+	public static int getWindowDebugState(KeyboardInput keyboard) {
 		
 		int value = 0;
-		if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_1)) value = 1;
-		if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_2)) value = 2;
-		if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_3)) value = 3;
-		if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_4)) value = 4;
-		if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_5)) value = 5;
-		if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_6)) value = 6;
-		if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_7)) value = 7;
-		if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_8)) value = 8;
-		if (rw.keyboard.isKeyPressed(GLFW.GLFW_KEY_9)) value = 9;
+		if (keyboard.isKeyPressed(GLFW.GLFW_KEY_1)) value = 1;
+		if (keyboard.isKeyPressed(GLFW.GLFW_KEY_2)) value = 2;
+		if (keyboard.isKeyPressed(GLFW.GLFW_KEY_3)) value = 3;
+		if (keyboard.isKeyPressed(GLFW.GLFW_KEY_4)) value = 4;
+		if (keyboard.isKeyPressed(GLFW.GLFW_KEY_5)) value = 5;
+		if (keyboard.isKeyPressed(GLFW.GLFW_KEY_6)) value = 6;
+		if (keyboard.isKeyPressed(GLFW.GLFW_KEY_7)) value = 7;
+		if (keyboard.isKeyPressed(GLFW.GLFW_KEY_8)) value = 8;
+		if (keyboard.isKeyPressed(GLFW.GLFW_KEY_9)) value = 9;
 		return value;
 	}
 	

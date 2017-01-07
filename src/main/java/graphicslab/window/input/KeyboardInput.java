@@ -7,19 +7,29 @@ import org.lwjgl.glfw.GLFWKeyCallbackI;
 
 import graphicslab.window.Window;
 
-public class KeyboardInput {
+public class KeyboardInput extends InputHandler {
 	private GLFWKeyCallbackI keycallback;
 	
 	private Window window;
 	
-	public KeyboardInput() {
-		
+	public KeyboardInput(Window window) {
+	    super(window);
 	}
 	
+	public KeyboardInput() {
+	    this(null);
+	}
+	
+	@Override
 	public void init(Window window) {
 		this.window = window;
 		keycallback = (windowPointer, key, scancode, action, mods)  -> {};
 		GLFW.glfwSetKeyCallback(window.getPointer(), keycallback);
+	}
+	
+	@Override
+	public void input() {
+	    
 	}
 	
 	/**

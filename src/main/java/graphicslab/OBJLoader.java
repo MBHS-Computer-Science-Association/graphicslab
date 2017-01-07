@@ -7,6 +7,8 @@ import java.util.List;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
+import graphicslab.util.Utils;
+
 public class OBJLoader {
 	public static Mesh loadMesh(String filename) throws IOException {
 		List<String> lines = Utils.readAllLines(filename);

@@ -3,18 +3,25 @@ package graphicslab;
 import org.joml.Vector3f;
 
 public class Item {
-	private final Mesh mesh;
+	private Mesh mesh;
 	
 	private final Vector3f position;
 	private final Vector3f rotation; 
 	private float scale;
+
+    public Item() {
+        position = new Vector3f(0.0f, 0.0f, 0.0f);
+        rotation = new Vector3f(0.0f, 0.0f, 0.0f);
+        scale = 1.0f;
+    }
 	
 	public Item(Mesh mesh) {
-		this.mesh = mesh;
-		
-		position = new Vector3f(0.0f, 0.0f, 0.0f);
-		rotation = new Vector3f(0.0f, 0.0f, 0.0f);
-		scale = 1.0f;
+	    this();
+	    setMesh(mesh);
+	}
+	
+	public void setMesh(Mesh mesh) {
+	    this.mesh = mesh;
 	}
 	
 	public Mesh getMesh() {

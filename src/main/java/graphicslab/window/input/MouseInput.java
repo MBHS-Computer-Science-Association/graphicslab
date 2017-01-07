@@ -12,7 +12,7 @@ import org.lwjgl.glfw.GLFWMouseButtonCallbackI;
 
 import graphicslab.window.Window;
 
-public class MouseInput {
+public class MouseInput extends InputHandler {
 
     private final Vector2d previousPos;
 
@@ -35,12 +35,18 @@ public class MouseInput {
     @SuppressWarnings("unused")
     private GLFWMouseButtonCallbackI mouseButtonCallback;
 
-    public MouseInput() {
+    public MouseInput(Window window) {
+        super(window);
         previousPos = new Vector2d(-1, -1);
         currentPos = new Vector2d(0, 0);
-        displVec = new Vector2f();
+        displVec = new Vector2f();        
+    }
+    
+    public MouseInput() {
+        this(null);
     }
 
+    @Override
     public void init(Window window) {
         glfwSetCursorPosCallback(window.getPointer(), (cursorPosCallback = (windowpointer, xpos, ypos) -> {
             currentPos.x = xpos;
@@ -61,7 +67,8 @@ public class MouseInput {
         return displVec;
     }
 
-    public void input(Window window) {
+    @Override
+    public void input() {
         displVec.x = 0;
         displVec.y = 0;
         if (previousPos.x > 0 && previousPos.y > 0 && inWindow) {
