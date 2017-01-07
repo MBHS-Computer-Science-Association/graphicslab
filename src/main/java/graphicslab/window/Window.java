@@ -225,8 +225,6 @@ public class Window {
             setResized(false);
         }
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the
-                                                            // framebuffer
         if (render != null) {
             render.loop(this);
         }

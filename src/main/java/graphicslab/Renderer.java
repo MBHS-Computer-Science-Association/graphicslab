@@ -30,6 +30,11 @@ public class Renderer {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 	
+	public void clear() {
+		// clear the framebuffer
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	}
+	
 	@Deprecated
 	public void render(Window window, RenderRoutine renderRoutine) {
 		shaderProgram.bind();
