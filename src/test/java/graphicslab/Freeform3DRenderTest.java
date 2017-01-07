@@ -29,9 +29,6 @@ public class Freeform3DRenderTest {
 	    final MouseInput mouse = new MouseInput();
 		
 	    final Scene3D scene = new Scene3D();
-
-	    final Mesh ballMesh = OBJLoader.loadMesh("src/test/ball.obj");
-	    ballMesh.setMaterial(new Material(new Texture("src/test/skybox.png")));
 	    
 	    final List<Item> items = scene.getItems();
 
@@ -100,7 +97,6 @@ public class Freeform3DRenderTest {
 		        float x, y, z;
 		        
 		        Item item = new Cube();
-//		        Item item = new Item(ballMesh);
 		        item.setScale(5f);
 		        
 		        if (items.size() > 10000) {
