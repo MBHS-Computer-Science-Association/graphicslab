@@ -52,14 +52,16 @@ public class AudioTest {
 		Window window = new Window(50, 50, "Audio Test");
 		
 		KeyboardInput keyboard = new KeyboardInput();
-		
-		window.setInitializeRoutine((w) -> {
-			keyboard.init(w);
-		});
-		
+
 		xPosition = -10000;
 		xVelocity = 0;
 		isMoving = false;
+		
+		window.setInitializeRoutine((w) -> {
+			keyboard.init(w);
+			alListener3f(AL_POSITION, xPosition, 0, 0);
+		});
+		
 		
 		window.setInputRoutine((w) -> {
 			if (keyboard.isKeyPressed(GLFW.GLFW_KEY_E)) {
