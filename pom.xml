@@ -11,6 +11,10 @@
 		<lwjgl.version>3.0.0</lwjgl.version>
 		<joml.version>1.8.4</joml.version>
 		<junit.version>4.12</junit.version>
+		
+		
+	    <maven.compiler.source>1.8</maven.compiler.source>
+	    <maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
 
 	<profiles>
